@@ -8,6 +8,8 @@ fn main() {
     // f to cross a task bcuz youre done with it
 
     let mut number_of_tasks = 0;
+
+    // init an array/vector for the tasks that have been created
     let mut task_list: Vec<String> = Vec::new();
 
     loop {
@@ -19,8 +21,8 @@ fn main() {
         if mode_input == "n" {
             let task = create_task();
             number_of_tasks += 1;
-            let task_copy = task.clone();
-            task_list.push(task_copy);
+            let task_copy = task.clone(); // this is done so that the fucking task isnt dropped
+            task_list.push(task_copy); // adding it to the array/vector of tasks
             println!("Task {}: {}", number_of_tasks, task);
         } else if mode_input == "d" {
         } else if mode_input == "ls" {
@@ -28,6 +30,7 @@ fn main() {
                 println!("Task list is empty. ");
             } else {
                 for (i, task) in task_list.iter().enumerate() {
+                    //iterates through elements in vec
                     println!("{}. {}", i + 1, task);
                 }
             }
@@ -48,5 +51,5 @@ fn create_task() -> std::string::String {
     println!("Enter ToDo: ");
     let mut task = String::new();
     io::stdin().read_line(&mut task).unwrap();
-    task.trim().to_string()
+    task.trim().to_string() // converts the task to a string so the compiler doesnt complain
 }
