@@ -8,17 +8,19 @@ fn main() {
     // f to cross a task bcuz youre done with it
 
     let mut number_of_tasks = 0;
-    let mut input = String::new();
-    let mode_input = io::stdin().read_line(&mut input).unwrap();
 
     loop {
-        if (mode_input == "n") {
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        let mode_input = input.trim();
+
+        if mode_input == "n" {
             create_task();
             number_of_tasks += 1;
             println!("Task {}: {}", number_of_tasks, input);
-        } else if (mode_input == "d") {
-        } else if (mode_input == "f") {
-        } else if (mode_input == "--help") {
+        } else if mode_input == "d" {
+        } else if mode_input == "f" {
+        } else if mode_input == "--help" {
             println!("Welome to Todolist version 1");
             println!("Available commands:");
             println!("\"n\": Create new ToDo");
@@ -33,5 +35,5 @@ fn main() {
 fn create_task() {
     println!("Enter ToDo");
     let mut task = String::new();
-    let input = io::stdin().read_line(&mut task).unwrap();
+    io::stdin().read_line(&mut task).unwrap();
 }
