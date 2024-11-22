@@ -15,9 +15,9 @@ fn main() {
         let mode_input = input.trim();
 
         if mode_input == "n" {
-            create_task();
+            let task = create_task();
             number_of_tasks += 1;
-            println!("Task {}: {}", number_of_tasks, input);
+            println!("Task {}: {}", number_of_tasks, task);
         } else if mode_input == "d" {
         } else if mode_input == "f" {
         } else if mode_input == "--help" {
@@ -32,8 +32,9 @@ fn main() {
     }
 }
 
-fn create_task() {
+fn create_task() -> std::string::String {
     println!("Enter ToDo");
     let mut task = String::new();
     io::stdin().read_line(&mut task).unwrap();
+    task.trim().to_string()
 }
