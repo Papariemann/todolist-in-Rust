@@ -25,6 +25,29 @@ fn main() {
             task_list.push(task_copy); // adding it to the array/vector of tasks
             println!("Task {}: {}", number_of_tasks, task);
         } else if mode_input == "d" {
+            for (i, task) in task_list.iter().enumerate() {
+                println!("{}. {}", i + 1, task);
+            }
+
+            println!("Enter ToDo to delete: (Enter ToDo contents or ToDo index)");
+            let mut todo_to_del = String::new();
+            io::stdin().read_line(&mut todo_to_del).unwrap();
+            let del_todo = todo_to_del.trim();
+            if let Ok(index) = del_todo.parse::<usize>() {
+                if index > 0 && index <= task_list.len() {
+                    // Adjust cuz list begins at task 1 but task_list begins at 0
+                    let pos = index - 1;
+                    task_list.remove(pos);
+                } else {
+                    println!("Invalid index. ");
+                }
+            } else {
+                if let Some(pos) = task_list.iter().position(|x| *x == del_todo) {
+                    task_list.remove(pos);
+                } else {
+                    println!("Task not found. ");
+                }
+            }
         } else if mode_input == "ls" {
             if task_list.is_empty() {
                 println!("Task list is empty. ");
