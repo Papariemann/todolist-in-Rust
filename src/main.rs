@@ -1,4 +1,5 @@
 use std::io;
+use std::process::Command;
 
 fn main() {
     //so we want to execute main,
@@ -7,6 +8,8 @@ fn main() {
     // and type d to delete a task
     // f to cross a task bcuz youre done with it
     // init an array/vector for the tasks that have been created
+    // I will jump off a bridge
+    // kill me
     let mut task_list: Vec<Task> = Vec::new();
 
     loop {
@@ -37,9 +40,10 @@ fn main() {
             }
             "f" => finish_task(&mut task_list, tasks),
             "d" => delete_task(&mut task_list, tasks),
-            "ls" => ls(&mut task_list),
+            "ls" => ls(&task_list),
             "esc" => break,
             "q" => break,
+            "clear" => clear_screen(),
             "--help" => show_help(),
             _ => println!("Unknown command"),
         }
@@ -61,7 +65,7 @@ fn create_task(task_name: &str) -> Task {
 
 fn ls(task_list: &[Task]) {
     if task_list.is_empty() {
-        println!("Not tasks.");
+        println!("No tasks.");
     } else {
         for (i, task) in task_list.iter().enumerate() {
             println!("{}. {} [{}]", i + 1, task.task, task.status);
@@ -70,25 +74,37 @@ fn ls(task_list: &[Task]) {
 }
 
 fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
-    let task_ids: Vec<usize> = parse_task_ids(task_input);
-    for task_id in task_ids {
-        if task_id <= task_list.len() {
-            task_list.remove(task_id - 1);
-            println!("Task {} deleted.", task_id);
+    if task_input == "all" {
+        task_list.clear();
+        println!("All tasks deleted.");
+    } else {
+        let task_ids: Vec<usize> = parse_task_ids(task_input);
+        for task_id in task_ids {
+            if task_id <= task_list.len() {
+                task_list.remove(task_id - 1);
+                println!("Task {} deleted.", task_id);
+            }
         }
     }
 }
 
 fn finish_task(task_list: &mut Vec<Task>, task_input: String) {
-    let task_ids: Vec<usize> = parse_task_ids(task_input);
-    for task_id in task_ids {
-        if task_id <= task_list.len() {
-            task_list[task_id - 1].status = String::from("Finished");
-            println!("Task {} marked as finished.", task_id);
+    if task_input == "all" {
+        for task in task_list {
+            task.status = String::from("Finished");
+        }
+    } else {
+        let task_ids: Vec<usize> = parse_task_ids(task_input);
+        for task_id in task_ids {
+            if task_id <= task_list.len() {
+                task_list[task_id - 1].status = String::from("Finished");
+                println!("Task {} marked as finished.", task_id);
+            }
         }
     }
 }
 
+// converts input into the location of the task in the task_list vec
 fn parse_task_ids(input: String) -> Vec<usize> {
     input
         .split_whitespace()
@@ -99,9 +115,21 @@ fn parse_task_ids(input: String) -> Vec<usize> {
 fn show_help() {
     println!("Welome to Todolist version 1");
     println!("Available commands:");
-    println!("\"n\": Create new ToDo");
-    println!("\"d\": Delete ToDo");
-    println!("\"f\": Cross out ToDo\n");
+    println!("\"n\": Create new ToDo (takes more than 1 input with && between inputs)");
+    println!("\"d\": Delete ToDo (takes more than 1 input with && between inputs)");
+    println!("\"f\": Cross out ToDo (takes more than 1 input with && between inputs) \n");
+}
+
+fn clear_screen() {
+    if cfg!(target_os = "windows") {
+        Command::new("cls")
+            .status()
+            .expect("Failed to execute 'cls' command.");
+    } else {
+        Command::new("clear")
+            .status()
+            .expect("Failed to execute 'clear' command.");
+    }
 }
 
 struct Task {
