@@ -11,55 +11,57 @@ fn main() {
 
     loop {
         println!("Enter input: (see --help for commands)");
-        let mode_input = read_input().trim().to_string();
+        let input = read_input();
 
-        match mode_input.as_str() {
+        let parts: Vec<&str> = input.split_whitespace().collect();
+        if parts.is_empty() {
+            continue;
+        }
+
+        let command = parts[0];
+        let tasks = parts[1..].join(" ");
+
+        match command {
             "n" => {
-                let task = create_task();
-                let task_clone = task.task.clone();
-                task_list.push(task);
-                println!("Task {}: {}", task_list.len(), task_clone);
+                if tasks.is_empty() {
+                    println!("No task provided.");
+                } else {
+                    let new_tasks: Vec<&str> = tasks.split("&&").collect();
+                    let new_task_clone = new_tasks.clone();
+                    for task in new_task_clone {
+                        let task = create_task(task.trim());
+                        task_list.push(task);
+                    }
+                    println!("Created {} task(s).", new_tasks.len());
+                }
             }
-            "d" => {
-                ls(&task_list);
-                let todo_to_del = read_input().trim().to_string();
-                delete_task(&mut task_list, &todo_to_del);
-            }
-            "ls" => ls(&task_list),
-            "f" => {
-                ls(&task_list);
-                let change_status_input = read_input().trim().to_string();
-                finish_task(&mut task_list, &change_status_input);
-            }
-            "--help" => {
-                show_help();
-            }
-            _ => println!("Command not recognised. Enter --help for more info."),
+            "f" => finish_task(&mut task_list, tasks),
+            "d" => delete_task(&mut task_list, tasks),
+            "ls" => ls(&mut task_list),
+            "esc" => break,
+            "q" => break,
+            "--help" => show_help(),
+            _ => println!("Unknown command"),
         }
     }
 }
 
 fn read_input() -> String {
     let mut input = String::new();
-    if io::stdin().read_line(&mut input).is_err() {
-        println!("Error reading input.");
-    }
-    input
+    io::stdin().read_line(&mut input).unwrap();
+    input.trim().to_string()
 }
 
-fn create_task() -> Task {
-    println!("Enter ToDo: ");
-    let mut task = String::new();
-    io::stdin().read_line(&mut task).unwrap();
+fn create_task(task_name: &str) -> Task {
     Task {
-        task: task.trim().to_string(),
+        task: task_name.to_string(),
         status: String::from("In progress"),
     }
 }
 
-fn ls(task_list: &Vec<Task>) {
+fn ls(task_list: &[Task]) {
     if task_list.is_empty() {
-        println!("Task list is empty. ");
+        println!("Not tasks.");
     } else {
         for (i, task) in task_list.iter().enumerate() {
             println!("{}. {} [{}]", i + 1, task.task, task.status);
@@ -67,32 +69,31 @@ fn ls(task_list: &Vec<Task>) {
     }
 }
 
-fn delete_task(task_list: &mut Vec<Task>, todo_to_del: &str) {
-    if let Ok(index) = todo_to_del.parse::<usize>() {
-        if index > 0 && index <= task_list.len() {
-            task_list.remove(index - 1);
-        } else {
-            println!("Invalid index.");
+fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
+    let task_ids: Vec<usize> = parse_task_ids(task_input);
+    for task_id in task_ids {
+        if task_id <= task_list.len() {
+            task_list.remove(task_id - 1);
+            println!("Task {} deleted.", task_id);
         }
-    } else if let Some(pos) = task_list.iter().position(|x| x.task == todo_to_del) {
-        task_list.remove(pos);
-    } else {
-        println!("Task not found.");
     }
 }
 
-fn finish_task(task_list: &mut Vec<Task>, todo_to_mark: &str) {
-    if let Ok(index) = todo_to_mark.parse::<usize>() {
-        if index > 0 && index <= task_list.len() {
-            task_list[index - 1].status = String::from("Finished");
-        } else {
-            println!("Invalid index.");
+fn finish_task(task_list: &mut Vec<Task>, task_input: String) {
+    let task_ids: Vec<usize> = parse_task_ids(task_input);
+    for task_id in task_ids {
+        if task_id <= task_list.len() {
+            task_list[task_id - 1].status = String::from("Finished");
+            println!("Task {} marked as finished.", task_id);
         }
-    } else if let Some(pos) = task_list.iter_mut().position(|x| x.task == todo_to_mark) {
-        task_list[pos].status = String::from("Finished");
-    } else {
-        println!("Task not found.");
     }
+}
+
+fn parse_task_ids(input: String) -> Vec<usize> {
+    input
+        .split_whitespace()
+        .filter_map(|x| x.parse::<usize>().ok())
+        .collect()
 }
 
 fn show_help() {
