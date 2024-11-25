@@ -50,12 +50,15 @@ fn main() {
     }
 }
 
+// made this into a function because it was annoying to write the same shit every time I needed
+// this functionality
 fn read_input() -> String {
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
     input.trim().to_string()
 }
 
+// creates a task
 fn create_task(task_name: &str) -> Task {
     Task {
         task: task_name.to_string(),
@@ -63,6 +66,7 @@ fn create_task(task_name: &str) -> Task {
     }
 }
 
+// lists all tasks present in task_list
 fn ls(task_list: &[Task]) {
     if task_list.is_empty() {
         println!("No tasks.");
@@ -73,6 +77,7 @@ fn ls(task_list: &[Task]) {
     }
 }
 
+//...fucking deletes a task what more needst thou know
 fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
     if task_input == "all" {
         task_list.clear();
@@ -88,6 +93,7 @@ fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
     }
 }
 
+// marks task.status as "Finished"
 fn finish_task(task_list: &mut Vec<Task>, task_input: String) {
     if task_input == "all" {
         for task in task_list {
@@ -112,6 +118,7 @@ fn parse_task_ids(input: String) -> Vec<usize> {
         .collect()
 }
 
+// pretty self explanatory I guess
 fn show_help() {
     println!("Welome to Todolist version 1");
     println!("Available commands:");
@@ -120,6 +127,7 @@ fn show_help() {
     println!("\"f\": Cross out ToDo (takes more than 1 input with && between inputs) \n");
 }
 
+// performs clear on the terminal in order to clear the current contents displayed
 fn clear_screen() {
     if cfg!(target_os = "windows") {
         Command::new("cls")
@@ -132,6 +140,7 @@ fn clear_screen() {
     }
 }
 
+// task type for making my life both easier and more difficult
 struct Task {
     task: String,
     status: String,
