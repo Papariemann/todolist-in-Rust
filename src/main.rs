@@ -127,7 +127,16 @@ fn show_help() {
     println!("Available commands:");
     println!("\"n\": Create new ToDo (takes more than 1 input with && between inputs)");
     println!("\"d\": Delete ToDo (takes more than 1 input with && between inputs)");
-    println!("\"f\": Cross out ToDo (takes more than 1 input with && between inputs) \n");
+    println!("\"f\": Cross out ToDo (takes more than 1 input with && between inputs)");
+    println!("\"ls\": Display current list of tasks");
+    println!("\"clear\": Clear text on terminal window");
+    println!("\"esc\" or \"q\": Quit program");
+    println!(
+        "\"save\": saves current list of tasks and their status in ~/tasks/tasks.whateverthefuck"
+    );
+    println!(
+        "\"load\": loads list of tasks and their status from ~/tasks/tasks.whateverthefuck \n"
+    );
 }
 
 // Clear the screen
