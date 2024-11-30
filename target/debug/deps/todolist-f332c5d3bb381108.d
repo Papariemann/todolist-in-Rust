@@ -1,6 +1,6 @@
-/home/ryan/projects/rust_stuff/todolist/target/debug/deps/libtodolist-f332c5d3bb381108.rmeta: src/main.rs Cargo.toml
+/home/ryan/rust_projects/todolist-in-Rust/target/debug/deps/libtodolist-f332c5d3bb381108.rmeta: src/main.rs Cargo.toml
 
-/home/ryan/projects/rust_stuff/todolist/target/debug/deps/todolist-f332c5d3bb381108.d: src/main.rs Cargo.toml
+/home/ryan/rust_projects/todolist-in-Rust/target/debug/deps/todolist-f332c5d3bb381108.d: src/main.rs Cargo.toml
 
 src/main.rs:
 Cargo.toml:

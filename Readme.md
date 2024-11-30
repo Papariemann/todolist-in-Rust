@@ -1,4 +1,2 @@
-To do list app with some vim like-features in Rust, 
-uh theres like already a gazillion to do lists out there so this is only for me to learn
-
-:3
+Terminal based to-do list app written in Rust, it probably has a bunch of bugs all throughout it but..
+I don't really care as long
