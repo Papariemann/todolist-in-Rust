@@ -1,15 +1,12 @@
+use dirs::home_dir;
+use std::fs;
 use std::io;
+use std::io::Write;
+use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
-    //so we want to execute main,
-    //then the program allocates 0 tasks initially
-    //while in program, type n to create new task,
-    // and type d to delete a task
-    // f to cross a task bcuz youre done with it
-    // init an array/vector for the tasks that have been created
-    // I will jump off a bridge
-    // kill me
+    // Initialize the task list
     let mut task_list: Vec<Task> = Vec::new();
 
     loop {
@@ -41,24 +38,30 @@ fn main() {
             "f" => finish_task(&mut task_list, tasks),
             "d" => delete_task(&mut task_list, tasks),
             "ls" => ls(&task_list),
-            "esc" => break,
-            "q" => break,
+            "esc" | "q" => break,
             "clear" => clear_screen(),
             "--help" => show_help(),
+            "save" => save_file(&task_list).expect("REASON"),
+            "load" => {
+                if let Ok(loaded_tasks) = load_file() {
+                    task_list = loaded_tasks;
+                } else {
+                    println!("Error loading tasks.");
+                }
+            }
             _ => println!("Unknown command"),
         }
     }
 }
 
-// made this into a function because it was annoying to write the same shit every time I needed
-// this functionality
+// Function to read input from user
 fn read_input() -> String {
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
     input.trim().to_string()
 }
 
-// creates a task
+// Create a new task
 fn create_task(task_name: &str) -> Task {
     Task {
         task: task_name.to_string(),
@@ -66,7 +69,7 @@ fn create_task(task_name: &str) -> Task {
     }
 }
 
-// lists all tasks present in task_list
+// List all tasks
 fn ls(task_list: &[Task]) {
     if task_list.is_empty() {
         println!("No tasks.");
@@ -77,7 +80,7 @@ fn ls(task_list: &[Task]) {
     }
 }
 
-//...fucking deletes a task what more needst thou know
+// Delete a task
 fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
     if task_input == "all" {
         task_list.clear();
@@ -93,7 +96,7 @@ fn delete_task(task_list: &mut Vec<Task>, task_input: String) {
     }
 }
 
-// marks task.status as "Finished"
+// Mark task as finished
 fn finish_task(task_list: &mut Vec<Task>, task_input: String) {
     if task_input == "all" {
         for task in task_list {
@@ -110,7 +113,7 @@ fn finish_task(task_list: &mut Vec<Task>, task_input: String) {
     }
 }
 
-// converts input into the location of the task in the task_list vec
+// Parse task IDs from input
 fn parse_task_ids(input: String) -> Vec<usize> {
     input
         .split_whitespace()
@@ -118,7 +121,7 @@ fn parse_task_ids(input: String) -> Vec<usize> {
         .collect()
 }
 
-// pretty self explanatory I guess
+// Show help information
 fn show_help() {
     println!("Welome to Todolist version 1");
     println!("Available commands:");
@@ -127,7 +130,7 @@ fn show_help() {
     println!("\"f\": Cross out ToDo (takes more than 1 input with && between inputs) \n");
 }
 
-// performs clear on the terminal in order to clear the current contents displayed
+// Clear the screen
 fn clear_screen() {
     if cfg!(target_os = "windows") {
         Command::new("cls")
@@ -140,8 +143,78 @@ fn clear_screen() {
     }
 }
 
-// task type for making my life both easier and more difficult
+// Define Task struct
+#[derive(Debug, Clone)]
 struct Task {
     task: String,
     status: String,
+}
+
+// Ensure the task list directory exists
+pub fn ensure_tasklist_dir() -> io::Result<PathBuf> {
+    let home = home_dir()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find home directory"))?;
+    let mut dir = home;
+    dir.push("tasks");
+
+    if !dir.exists() {
+        fs::create_dir_all(&dir)?;
+    }
+
+    Ok(dir)
+}
+
+// Write tasks to file
+pub fn write_tasks_to_file(filename: Option<&str>, tasks: &[Task]) -> io::Result<()> {
+    let dir = ensure_tasklist_dir()?;
+
+    let file_name = filename.unwrap_or("tasks.whateverthefuck");
+    let mut file_path = dir;
+    file_path.push(file_name);
+
+    let mut file = fs::File::create(file_path)?;
+    for task in tasks {
+        writeln!(file, "{}:{}", task.status, task.task)?;
+    }
+    Ok(())
+}
+
+// Read tasks from file
+pub fn read_tasks_from_file(filename: Option<&str>) -> io::Result<Vec<Task>> {
+    let dir = ensure_tasklist_dir()?;
+
+    let file_name = filename.unwrap_or("tasks.whateverthefuck");
+    let mut file_path = dir;
+    file_path.push(file_name);
+
+    if file_path.exists() {
+        let content = fs::read_to_string(file_path)?;
+        let tasks = content
+            .lines()
+            .filter_map(|line| {
+                let mut parts = line.splitn(2, ":");
+                let status = parts.next()?.to_string();
+                let task = parts.next()?.to_string();
+                Some(Task { status, task })
+            })
+            .collect();
+        Ok(tasks)
+    } else {
+        Ok(Vec::new())
+    }
+}
+
+// Save tasks to file
+fn save_file(task_list: &[Task]) -> std::io::Result<()> {
+    write_tasks_to_file(None, task_list)?;
+    println!("Tasks saved successfully!");
+    Ok(())
+}
+
+// Load tasks from file
+fn load_file() -> std::io::Result<Vec<Task>> {
+    let loaded_tasks = read_tasks_from_file(None)?;
+    println!("Loaded tasks: {:?}", loaded_tasks);
+
+    Ok(loaded_tasks)
 }
